@@ -8,7 +8,6 @@ contract Ani {
     uint256 public totalSupply; 
     uint256 public initialSupply = 1000; 
     uint256 productCounter; 
-    uint256 supplyNodeCounter; 
 
     struct Product {
         uint256 productID;
@@ -18,14 +17,12 @@ contract Ani {
         string status;
     }
 
-    struct SupplyNode {
-        uint256 supplyNodeID;
-        string name;
+    struct Role {
         string role;
     }
 
     mapping(address => Product) public products;
-    mapping(address => SupplyNode) public supplyNodes;
+    mapping(address => Role) public roles;
 
     modifier isHolder() {
         require(msg.sender == holder, "You are not the holder!");
@@ -37,17 +34,17 @@ contract Ani {
     }
 
     modifier isProducer() {
-        require(compare(supplyNodes[holder].role, "Producer"), "You are not a producer!");
+        require(compare(roles[holder].role, "Producer"), "You are not a producer!");
         _;
     }
 
     modifier isDistributor() {
-        require(compare(supplyNodes[holder].role, "Distributor"), "You are not a distributor!");
+        require(compare(roles[holder].role, "Distributor"), "You are not a distributor!");
         _;
     }
 
     modifier isRetailer() {
-        require(compare(supplyNodes[holder].role, "Retailer"), "You are not a retailer!");
+        require(compare(roles[holder].role, "Retailer"), "You are not a retailer!");
         _;
     }
 
@@ -58,30 +55,6 @@ contract Ani {
 
     function checkHolder() external view isHolder returns (string memory) {
         return "I am still the holder!";
-    }
-
-    // SUPPLY NODE REGISTRAITON: Register supply node
-    function registerSupplyNode(
-        string memory _name,
-        string memory _role
-    ) external isHolder{
-        require(bytes(_name).length > 0, "Name cannot be empty");
-        require(bytes(_role).length > 0, "Role field required");
-        require(compare(_role, "Producer") || compare(_role, "Distributor") || compare(_role, "Retailer"), "Role must either be Producer, Distributor, or Retailer");
-
-
-        //Increment holder counter used in generating holder IDs
-        supplyNodeCounter++;
-
-        //Create new supply node object
-        SupplyNode memory newSupplyNode = SupplyNode({
-            supplyNodeID: supplyNodeCounter,
-            name: _name,
-            role: _role
-        });
-
-    supplyNodes[holder] = newSupplyNode;
-
     }
 
     // PRODUCT REGISTRATION: Producer registers product with pertinent details
@@ -111,7 +84,7 @@ contract Ani {
         products[holder] = newProduct;
     }
 
-    // TRANSFER PRODUCT : Any holder transfers product to any other holder
+    // TRANSFER PRODUCT : 
     function transferProduct(address recipient, uint256 productID) external isHolder{
         //Ensure that the holder currently holds the product
         require(products[holder].productID == productID, "Product not found");
