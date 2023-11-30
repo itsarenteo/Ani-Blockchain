@@ -65,7 +65,6 @@ contract Ani {
         require(bytes(_physicalAddress).length > 0, "Physical address cannot be empty");
         require(bytes(_status).length > 0, "Status cannot be empty");
 
-        //Increment product counter used in generating product IDs
         productCounter++;
 
         //Create new product object
@@ -81,23 +80,7 @@ contract Ani {
     }
 
     // TRANSFER PRODUCT : 
-    function transferProduct(address recipient, uint256 productID) external isHolder{
-        //Ensure that the holder currently holds the product
-        require(products[holder].productID == productID, "Product not found");
-
-        //Recreate product within recipient's product mapping
-        products[recipient] = Product({
-            productID: productID,
-            name: products[holder].name,
-            quantityInKilograms: products[holder].quantityInKilograms,
-            physicalAddress: products[holder].physicalAddress,
-            status: products[holder].status
-        });
-
-        // Delete the product entry from the current holder's mapping
-        delete products[holder];
-
-        //Update holder
+    function transferProduct(address recipient) external isHolder{
         holder = recipient;
     }
 

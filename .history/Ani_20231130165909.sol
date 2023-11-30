@@ -7,14 +7,14 @@ contract Ani {
     address public holder; 
     uint256 public totalSupply; 
     uint256 public initialSupply = 1000; 
-    uint256 productCounter; 
 
     struct Product {
-        uint256 productID;
         string name;
         uint256 quantityInKilograms;
         string physicalAddress;
-        string "status"
+
+        //uint256 plantingDate;
+        //uint256 expectedHarvestTime;
     }
 
     struct Role {
@@ -34,71 +34,37 @@ contract Ani {
         _;
     }
 
-    modifier isDistributor() {
-        require(roles[holder].role == "Distributor", "You are not a producer!");
-        _;
-    }
-
-    modifier isRetailer() {
-        require(roles[holder].role == "Retailer", "You are not a producer!");
-        _;
-    }
-
     constructor() {
         holder = msg.sender;
         totalSupply = initialSupply;
+    }
+
+    function transfer(address add) external isHolder {
+        holder = add;
     }
 
     function checkHolder() external view isHolder returns (string memory) {
         return "I am still the holder!";
     }
 
-    // PRODUCT REGISTRATION: Producer registers product with pertinent details
+    // PRODUCT REGISTRATION: Farmer registers product with harvesttime and plantDate
     function registerProduct(
         string memory _name,
         uint256 memory _quantityInKilograms,
-        string memory _physicalAddress,
-        string _status
-    ) external isHolder isProducer {
+        string memory _physicalAddress
+    ) external isHolder {
         require(bytes(_name).length > 0, "Product name cannot be empty");
         require(bytes(_quantityInKilograms) > 0, "Quantity must be greater than 0");
         require(bytes(_physicalAddress).length > 0, "Physical address cannot be empty");
-        require(bytes(_status).length > 0, "Status cannot be empty");
-
-        //Increment product counter used in generating product IDs
-        productCounter++;
 
         //Create new product object
         Product memory newProduct = Product({
-            productID: productCounter,
             name: _name,
             quantityInKilograms: _quantityInKilograms,
-            physicalAddress: _physicalAddress,
-            status: _status
+            physicalAddress: _physicalAddress
         });
 
         products[holder] = newProduct;
-    }
-
-    // TRANSFER PRODUCT : 
-    function transferProduct(address recipient, uint256 productID) external isHolder{
-        //Ensure that the holder currently holds the product
-        require(products[holder].productID == productID, "Product not found");
-
-        //Recreate product within recipient's product mapping
-        products[recipient] = Product({
-            productID: productID,
-            name: products[holder].name,
-            quantityInKilograms: products[holder].quantityInKilograms,
-            physicalAddress: products[holder].physicalAddress,
-            status: products[holder].status
-        });
-
-        // Delete the product entry from the current holder's mapping
-        delete products[holder];
-
-        //Update holder
-        holder = recipient;
     }
 
     //View products registered by holder

@@ -85,19 +85,13 @@ contract Ani {
         //Ensure that the holder currently holds the product
         require(products[holder].productID == productID, "Product not found");
 
-        //Recreate product within recipient's product mapping
-        products[recipient] = Product({
-            productID: productID,
-            name: products[holder].name,
-            quantityInKilograms: products[holder].quantityInKilograms,
-            physicalAddress: products[holder].physicalAddress,
-            status: products[holder].status
-        });
+        //Recreate product and map it to the recipient
+        Product memory transferredProduct = products[holder];
 
-        // Delete the product entry from the current holder's mapping
-        delete products[holder];
+        // Update the recipient's product mapping
+        products[recipient] = products[holder];
 
-        //Update holder
+
         holder = recipient;
     }
 
